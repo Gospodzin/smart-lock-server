@@ -5,15 +5,38 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.stak.smartlockserver.security.*;
+
+import java.io.IOException;
+
 
 public class ServerActivity extends ActionBarActivity {
+
+    private String keyStorePath;
+
+    SecurityHelper securityHelper = new SecurityHelper();
+
+    private void init() {
+        keyStorePath = getFilesDir() + "/keystore";
+        initKeyStore();
+    }
+
+    private void initKeyStore() {
+        try {
+            if(!securityHelper.isKeyStoreFileExistent(keyStorePath))
+            securityHelper.generateKeyStoreFile(keyStorePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
-    }
 
+        init();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
