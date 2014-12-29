@@ -12,6 +12,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.UUID;
 
 import static com.stak.smartlockserver.security.Constants.*;
 
@@ -38,5 +39,9 @@ public class SecurityHelper {
     public boolean isKeyStoreFileExistent(String path) {
         File file = new File(path);
         return file.exists();
+    }
+
+    public String generateAuthToken() {
+        return UUID.randomUUID().toString();
     }
 }
