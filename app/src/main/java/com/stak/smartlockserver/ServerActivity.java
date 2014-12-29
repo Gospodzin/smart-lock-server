@@ -1,14 +1,16 @@
 package com.stak.smartlockserver;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.stak.smartlockserver.security.*;
+import com.stak.smartlockserver.security.SecurityHelper;
 
 import java.io.IOException;
+
+import static com.stak.smartlockserver.security.Constants.KEY_STORE_FILE;
 
 
 public class ServerActivity extends ActionBarActivity {
@@ -18,7 +20,7 @@ public class ServerActivity extends ActionBarActivity {
     SecurityHelper securityHelper = new SecurityHelper();
 
     private void init() {
-        keyStorePath = getFilesDir() + "/keystore";
+        keyStorePath = getFilesDir() + "/" + KEY_STORE_FILE;
         initKeyStore();
         startService(new Intent(this, ServerService.class));
     }

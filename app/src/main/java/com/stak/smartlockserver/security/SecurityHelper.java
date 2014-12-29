@@ -1,18 +1,16 @@
 package com.stak.smartlockserver.security;
 
+import com.j256.ormlite.dao.Dao;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
+import java.sql.SQLException;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 import static com.stak.smartlockserver.security.Constants.*;
 
@@ -20,7 +18,11 @@ import static com.stak.smartlockserver.security.Constants.*;
  * Created by gospo on 28.12.14.
  */
 public class SecurityHelper {
-    KeyStoreGenerator ksg = new KeyStoreGenerator();
+    @Inject
+    Dao<AuthToken, String> authTokenDao;
+
+    @Inject
+    KeyStoreGenerator ksg;
 
     private void generateKeyStore(OutputStream outputStream) {
         KeyStore keyStore = ksg.generateKeyStore();
@@ -29,11 +31,12 @@ public class SecurityHelper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public void generateKeyStoreFile(String path) throws IOException {
-        generateKeyStore(new FileOutputStream(path));
+        FileOutputStream fos = new FileOutputStream(path);
+        generateKeyStore(fos);
+        fos.close();
     }
 
     public boolean isKeyStoreFileExistent(String path) {
@@ -41,7 +44,27 @@ public class SecurityHelper {
         return file.exists();
     }
 
-    public String generateAuthToken() {
-        return UUID.randomUUID().toString();
+    public AuthToken register() {
+        String token = UUID.randomUUID().toString();
+        AuthToken authToken = new AuthToken(token);
+        try {
+            authTokenDao.create(authToken);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return authToken;
+    }
+
+    public boolean isAuthorized(AuthToken token) {
+        boolean isAuthorized = false;
+
+        try {
+            isAuthorized = authTokenDao.idExists(token.getToken());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return  isAuthorized;
     }
 }

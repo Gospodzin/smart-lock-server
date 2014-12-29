@@ -21,7 +21,7 @@ import static com.stak.smartlockserver.security.Constants.*;
 /**
  * Created by gospo on 28.12.14.
  */
-class KeyStoreGenerator {
+public class KeyStoreGenerator {
     private KeyPair generateKeyPair() {
         KeyPair keyPair = null;
 

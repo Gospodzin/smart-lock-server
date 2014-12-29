@@ -4,13 +4,15 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.stak.smartlockserver.di.DIFinder;
 import com.stak.smartlockserver.rest.RegistrationResource;
+import com.stak.smartlockserver.rest.SmartLockResource;
 
 import org.restlet.Component;
+import org.restlet.Context;
 import org.restlet.Server;
 import org.restlet.data.Parameter;
 import org.restlet.data.Protocol;
-import org.restlet.resource.ServerResource;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
@@ -20,7 +22,10 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-import static com.stak.smartlockserver.Constants.*;
+import static com.stak.smartlockserver.Constants.SMART_LOCK_PORT;
+import static com.stak.smartlockserver.security.Constants.KEY_PASSWORD;
+import static com.stak.smartlockserver.security.Constants.KEY_STORE_FILE;
+import static com.stak.smartlockserver.security.Constants.KEY_STORE_PASSWORD;
 
 /**
  * Created by gospo on 26.12.14.
@@ -45,33 +50,41 @@ public class ServerService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
         serverComponent = new Component();
-        Server server = new Server(Protocol.HTTPS, null, SMART_LOCK_PORT, null);
+        Server server = createServer();
         serverComponent.getServers().add(server);
-        Series<Parameter> parameters = server.getContext().getParameters();
-        parameters.add("keystorePath", getFilesDir() + "/keystore");
-        parameters.add("keystorePassword", "");
-        parameters.add("keyPassword", "");
-        parameters.add("keystoreType", KeyStore.getDefaultType());
-        parameters.add("keyManagerAlgorithm", KeyManagerFactory.getDefaultAlgorithm());
-        parameters.add("trustManagerAlgorithm", TrustManagerFactory.getDefaultAlgorithm());
-
-        final Router router = new Router(serverComponent.getContext().createChildContext());
-        router.setDefaultMatchingMode(Template.MODE_STARTS_WITH);
-        router.attach("/register", RegistrationResource.class);
-        serverComponent.getDefaultHost().attach(router);
+        addParameters(server.getContext().getParameters());
+        serverComponent.getDefaultHost().attach(createRouter(serverComponent.getContext().createChildContext()));
         try {
             serverComponent.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private Server createServer() {
+        Server server = new Server(Protocol.HTTPS, null, SMART_LOCK_PORT, null);
+
+        return server;
+    }
+
+    private void addParameters(Series <Parameter> parameters) {
+        parameters.add("keystorePath", getFilesDir() + "/" + KEY_STORE_FILE);
+        parameters.add("keystorePassword", KEY_STORE_PASSWORD);
+        parameters.add("keyPassword", KEY_PASSWORD);
+        parameters.add("keystoreType", KeyStore.getDefaultType());
+        parameters.add("keyManagerAlgorithm", KeyManagerFactory.getDefaultAlgorithm());
+        parameters.add("trustManagerAlgorithm", TrustManagerFactory.getDefaultAlgorithm());
+    }
+
+    private Router createRouter(Context context) {
+        final Router router = new Router(context);
+        router.setFinderClass(DIFinder.class);
+        router.attach("/register", RegistrationResource.class);
+        router.attach("/auth/{command}/{token}", SmartLockResource.class);
+        return router;
     }
 }
