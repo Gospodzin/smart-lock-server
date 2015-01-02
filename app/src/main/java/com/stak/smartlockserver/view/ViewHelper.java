@@ -29,36 +29,19 @@ public class ViewHelper {
             List<AuthToken> authTokens = authTokensDao.queryForAll();
 
             List<UserDTO> users = new ArrayList<>();
-            users.addAll(Collections2.transform(registrations, new RegistrationToUserDTO()));
-            users.addAll(Collections2.transform(authTokens, new AuthTokenToUserDTO()));
+            users.addAll(Collections2.transform(registrations, new Function<Registration, UserDTO>() {
+                @Override
+                public UserDTO apply(Registration registration) { return new UserDTO(registration.getUsername(), registration.getPin()); }
+            }));
+            users.addAll(Collections2.transform(authTokens, new Function<AuthToken, UserDTO>() {
+                @Override
+                public UserDTO apply(AuthToken authToken) { return new UserDTO(authToken.getUsername(), null); }
+            }));
 
             return users;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-    }
-
-    private class RegistrationToUserDTO implements Function<Registration, UserDTO> {
-        @Override
-        public UserDTO apply(Registration input) {
-            return registrationToUserDTO(input);
-        }
-    }
-
-    private class AuthTokenToUserDTO implements Function<AuthToken, UserDTO> {
-        @Override
-        public UserDTO apply(AuthToken input) {
-            return authTokenToUserDTO(input);
-        }
-    }
-
-    public UserDTO authTokenToUserDTO(AuthToken authToken) {
-        return new UserDTO(authToken.getUsername());
-    }
-
-    public UserDTO registrationToUserDTO(Registration registration) {
-        return new UserDTO(registration.getUsername());
     }
 }

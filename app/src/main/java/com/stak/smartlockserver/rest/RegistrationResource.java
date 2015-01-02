@@ -23,7 +23,7 @@ public class RegistrationResource extends ServerResource {
     public String confirm() {
         Log.i(getClass().toString(), "Registration confirmation...");
         String username = getAttribute("username");
-        Integer pin = Integer.valueOf(getAttribute("pin"));
+        String pin = getAttribute("pin");
         return securityHelper.confirmRegistration(username, pin);
     }
 }

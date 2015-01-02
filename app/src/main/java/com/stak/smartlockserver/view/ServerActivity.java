@@ -5,9 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +19,7 @@ import com.stak.smartlockserver.R;
 import com.stak.smartlockserver.rest.ServerService;
 import com.stak.smartlockserver.SmartLockApp;
 import com.stak.smartlockserver.security.SecurityHelper;
+import com.stak.smartlockserver.security.model.Registration;
 
 import java.io.IOException;
 
@@ -30,13 +33,12 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
     AlertDialog createUserDialog;
     Button createUserButton;
     ListView usersList;
+    ArrayAdapter<UserDTO> usersAdapter;
 
-    String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
-            "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
-            "Linux", "OS/2", "Ubuntu", "Windows7", "Max OS X", "Linux",
-            "OS/2", "Ubuntu", "Windows7", "Max OS X", "Linux", "OS/2",
-            "Android", "iPhone", "WindowsMobile" };
+    public static final int DELETE_MENU_ITEM = 0;
 
+    @Inject
+    ViewHelper viewHelper;
 
     @Inject
     SecurityHelper securityHelper;
@@ -45,12 +47,15 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
         SmartLockApp.inject(this);
 
         usersList = (ListView) findViewById(R.id.usersListView);
-        usersList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, values));
+        usersAdapter = new ArrayAdapter<UserDTO>(this, android.R.layout.simple_list_item_1, viewHelper.getUsersList());
+        usersList.setAdapter(usersAdapter);
 
         createUserDialog = createDialog();
 
         createUserButton = (Button) findViewById(R.id.addUserButton);
         createUserButton.setOnClickListener(this);
+
+        registerForContextMenu(usersList);
 
 
         initKeyStore();
@@ -69,20 +74,41 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
 
     private AlertDialog createDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("title");
+        builder.setTitle("Utwórz");
         final EditText usernameEditText = new EditText(this);
         builder.setView(usernameEditText);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                String username = usernameEditText.getText().toString();
-                securityHelper.register(username);
-            }
-        });
+        builder.setPositiveButton("OK", null);
         builder.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) { }
         });
 
-        return builder.create();
+        final AlertDialog dialog = builder.create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface d) {
+                Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        String username = usernameEditText.getText().toString();
+                        try {
+                            Registration registration = securityHelper.register(username);
+                            usersAdapter.add(new UserDTO(registration.getUsername(), registration.getPin()));
+                            usernameEditText.getText().clear();
+                            dialog.dismiss();
+                        } catch (SecurityHelper.UserExistsException e) {
+                            e.printStackTrace();
+                            usernameEditText.getText().clear();
+                        }
+                    }
+                });
+            }
+        });
+
+        return dialog;
     }
 
     @Override
@@ -101,27 +127,34 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.addUserButton:
                 createUserDialog.show();
                 break;
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        switch(v.getId()) {
+            case R.id.usersListView:
+                MenuItem menuItem = menu.add(Menu.NONE, DELETE_MENU_ITEM, 0, "Usuń");
+                break;
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case DELETE_MENU_ITEM:
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                UserDTO user = usersAdapter.getItem(info.position);
+                securityHelper.deleteUser(user.getUsername());
+                usersAdapter.remove(user);
+                break;
+        }
+        return true;
     }
 }
 

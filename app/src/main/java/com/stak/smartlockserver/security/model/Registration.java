@@ -16,11 +16,11 @@ public class Registration {
     private String username;
 
     @DatabaseField(columnName = PIN)
-    private Integer pin;
+    private String pin;
 
     public Registration() {}
 
-    public Registration(String username, Integer pin) {
+    public Registration(String username, String pin) {
         this.username = username;
         this.pin = pin;
     }
@@ -33,11 +33,11 @@ public class Registration {
         this.username = username;
     }
 
-    public Integer getPin() {
+    public String getPin() {
         return pin;
     }
 
-    public void setPin(Integer pin) {
+    public void setPin(String pin) {
         this.pin = pin;
     }
 }

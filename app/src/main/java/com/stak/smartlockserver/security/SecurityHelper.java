@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,14 +54,16 @@ public class SecurityHelper {
         return file.exists();
     }
 
-    public Registration register(String userName) {
+    public class UserExistsException extends Exception {public UserExistsException(){super("User already exists.");}}
+
+    public Registration register(String userName) throws UserExistsException {
         try {
             if(!registrationsDao.queryForEq(Registration.USERNAME, userName).isEmpty()
                     || !authTokensDao.queryForEq(AuthToken.USERNAME, userName).isEmpty())
-                return null;
+                throw new UserExistsException();
 
             SecureRandom secureRandom = new SecureRandom();
-            int pin = Math.abs(secureRandom.nextInt(10000));
+            String pin = new DecimalFormat("0000").format(Math.abs(secureRandom.nextInt(10000)));
             Registration registration = new Registration(userName, pin);
 
             registrationsDao.create(registration);
@@ -70,7 +73,7 @@ public class SecurityHelper {
         }
     }
 
-    public String confirmRegistration(String username, int pin) {
+    public String confirmRegistration(String username, String pin) {
         try {
             Registration registration = new Registration(username, pin);
             if(registrationsDao.queryForMatching(registration).isEmpty())
@@ -97,5 +100,14 @@ public class SecurityHelper {
 
     public boolean isAuthorized(String token) {
         return authenticate(token) != null;
+    }
+
+    public void deleteUser(String username) {
+        try {
+            authTokensDao.delete(new AuthToken(null, username));
+            registrationsDao.delete(new Registration(username, null));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
