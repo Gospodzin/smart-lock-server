@@ -1,4 +1,4 @@
-package com.stak.smartlockserver;
+package com.stak.smartlockserver.rest;
 
 import android.app.Service;
 import android.content.Intent;

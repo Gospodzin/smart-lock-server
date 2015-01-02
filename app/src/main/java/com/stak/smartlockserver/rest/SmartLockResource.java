@@ -1,13 +1,13 @@
 package com.stak.smartlockserver.rest;
 
+import android.util.Log;
+
 import com.stak.smartlockserver.LockManager;
-import com.stak.smartlockserver.security.AuthToken;
 import com.stak.smartlockserver.security.SecurityHelper;
 
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
-
-import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
 
@@ -22,14 +22,16 @@ public class SmartLockResource extends ServerResource {
     LockManager lockManager;
 
     @Get
+    @Post
     public boolean command() {
         String token = getAttribute("token");
         // if not authorized return false
-        if(!securityHelper.isAuthorized(new AuthToken(token)))
+        if(!securityHelper.isAuthorized(token))
             return false;
 
         // if authorized
         String command = getAttribute("command");
+        Log.i(getClass().toString(), "Command " + command + "...");
         switch(command.toUpperCase()) {
             case "OPEN":
                 lockManager.open();
