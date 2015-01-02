@@ -83,8 +83,8 @@ public class ServerService extends Service {
     private Router createRouter(Context context) {
         final Router router = new Router(context);
         router.setFinderClass(DIFinder.class);
-        router.attach("/register", RegistrationResource.class);
-        router.attach("/auth/{command}/{token}", SmartLockResource.class);
+        router.attach("/confirm/{username}/{pin}", RegistrationResource.class);
+        router.attach("/lock/{command}/{token}", SmartLockResource.class);
         return router;
     }
 }
