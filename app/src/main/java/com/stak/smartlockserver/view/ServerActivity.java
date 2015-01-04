@@ -92,10 +92,8 @@ public class ServerActivity extends ActionBarActivity {
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
 
-        // Convert little-endian to big-endianif needed
-        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN))
             ipAddress = Integer.reverseBytes(ipAddress);
-        }
 
         byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
 
@@ -131,7 +129,7 @@ public class ServerActivity extends ActionBarActivity {
 
                     @Override
                     public void onClick(View view) {
-                        String username = usernameEditText.getText().toString();
+                        String username = usernameEditText.getText().toString().trim();
                         try {
                             Registration registration = securityHelper.register(username);
                             usersAdapter.add(new UserDTO(registration.getUsername(), registration.getPin()));

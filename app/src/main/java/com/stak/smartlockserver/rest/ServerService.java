@@ -4,9 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-import com.stak.smartlockserver.di.DIFinder;
-import com.stak.smartlockserver.rest.RegistrationResource;
-import com.stak.smartlockserver.rest.SmartLockResource;
+import com.stak.smartlockserver.rest.di.DIFinder;
 
 import org.restlet.Component;
 import org.restlet.Context;
@@ -16,7 +14,6 @@ import org.restlet.data.Protocol;
 import org.restlet.engine.Engine;
 import org.restlet.ext.gson.GsonConverter;
 import org.restlet.routing.Router;
-import org.restlet.routing.Template;
 import org.restlet.util.Series;
 
 import java.security.KeyStore;
@@ -24,7 +21,7 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-import static com.stak.smartlockserver.Constants.SMART_LOCK_PORT;
+import static com.stak.smartlockserver.rest.Constants.SMART_LOCK_PORT;
 import static com.stak.smartlockserver.security.Constants.KEY_PASSWORD;
 import static com.stak.smartlockserver.security.Constants.KEY_STORE_FILE;
 import static com.stak.smartlockserver.security.Constants.KEY_STORE_PASSWORD;

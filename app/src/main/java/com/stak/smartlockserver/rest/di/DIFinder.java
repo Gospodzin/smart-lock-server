@@ -1,4 +1,4 @@
-package com.stak.smartlockserver.di;
+package com.stak.smartlockserver.rest.di;
 
 import com.stak.smartlockserver.SmartLockApp;
 

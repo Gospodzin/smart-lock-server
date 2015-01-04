@@ -1,4 +1,4 @@
-package com.stak.smartlockserver;
+package com.stak.smartlockserver.rest;
 
 /**
  * Created by gospo on 29.12.14.
