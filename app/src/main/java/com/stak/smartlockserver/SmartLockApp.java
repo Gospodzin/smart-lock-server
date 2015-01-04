@@ -4,6 +4,9 @@ import android.app.Application;
 
 import com.stak.smartlockserver.security.SecurityHelper;
 
+import org.restlet.engine.Engine;
+import org.restlet.ext.gson.GsonConverter;
+
 import java.util.Arrays;
 import java.util.List;
 

@@ -2,6 +2,7 @@ package com.stak.smartlockserver.rest;
 
 import android.util.Log;
 
+import com.stak.smartlockserver.rest.dto.ConfirmDTO;
 import com.stak.smartlockserver.security.SecurityHelper;
 
 import org.restlet.resource.Get;
@@ -18,12 +19,10 @@ public class RegistrationResource extends ServerResource {
     @Inject
     SecurityHelper securityHelper;
 
-    @Get
     @Post
-    public String confirm() {
+    public String confirm(ConfirmDTO dto) {
         Log.i(getClass().toString(), "Registration confirmation...");
-        String username = getAttribute("username");
-        String pin = getAttribute("pin");
-        return securityHelper.confirmRegistration(username, pin);
+        String token = securityHelper.confirmRegistration(dto.getUsername(), dto.getPin());
+        return  token;
     }
 }

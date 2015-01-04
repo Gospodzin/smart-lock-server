@@ -3,6 +3,7 @@ package com.stak.smartlockserver.rest;
 import android.util.Log;
 
 import com.stak.smartlockserver.LockManager;
+import com.stak.smartlockserver.rest.dto.CommandDTO;
 import com.stak.smartlockserver.security.SecurityHelper;
 
 import org.restlet.resource.Get;
@@ -21,28 +22,25 @@ public class SmartLockResource extends ServerResource {
     @Inject
     LockManager lockManager;
 
-    @Get
     @Post
-    public boolean command() {
-        String token = getAttribute("token");
+    public boolean command(CommandDTO dto) {
+
         // if not authorized return false
-        if(!securityHelper.isAuthorized(token))
+        if(!securityHelper.isAuthorized(dto.getToken()))
             return false;
 
         // if authorized
-        String command = getAttribute("command");
-        Log.i(getClass().toString(), "Command " + command + "...");
-        switch(command.toUpperCase()) {
+        Log.i(getClass().toString(), "Command " + dto.getCommand() + "...");
+        switch(dto.getCommand().toUpperCase()) {
             case "OPEN":
                 lockManager.open();
-                break;
+                return true;
             case "CLOSE":
                 lockManager.close();
-                break;
+                return true;
             default:
                 // no such command
                 return false;
         }
-        return true;
     }
 }

@@ -3,5 +3,6 @@
 
     <string name="app_name">Smart Lock Server</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_refresh">Odśwież</string>
+    <string name="action_new_user">Nowy</string>
 </resources>

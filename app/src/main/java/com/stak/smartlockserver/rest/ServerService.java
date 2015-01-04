@@ -13,6 +13,8 @@ import org.restlet.Context;
 import org.restlet.Server;
 import org.restlet.data.Parameter;
 import org.restlet.data.Protocol;
+import org.restlet.engine.Engine;
+import org.restlet.ext.gson.GsonConverter;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.util.Series;
@@ -52,6 +54,9 @@ public class ServerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Engine.getInstance().getRegisteredConverters().clear();
+        Engine.getInstance().getRegisteredConverters().add(new GsonConverter());
+
         serverComponent = new Component();
         Server server = createServer();
         serverComponent.getServers().add(server);
@@ -83,8 +88,8 @@ public class ServerService extends Service {
     private Router createRouter(Context context) {
         final Router router = new Router(context);
         router.setFinderClass(DIFinder.class);
-        router.attach("/confirm/{username}/{pin}", RegistrationResource.class);
-        router.attach("/lock/{command}/{token}", SmartLockResource.class);
+        router.attach("/confirm", RegistrationResource.class);
+        router.attach("/lock", SmartLockResource.class);
         return router;
     }
 }

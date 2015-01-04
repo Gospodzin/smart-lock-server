@@ -104,8 +104,8 @@ public class SecurityHelper {
 
     public void deleteUser(String username) {
         try {
-            authTokensDao.delete(new AuthToken(null, username));
-            registrationsDao.delete(new Registration(username, null));
+            authTokensDao.delete(authTokensDao.queryForEq(AuthToken.USERNAME, username));
+            registrationsDao.delete(registrationsDao.queryForEq(Registration.USERNAME, username));
         } catch (SQLException e) {
             e.printStackTrace();
         }

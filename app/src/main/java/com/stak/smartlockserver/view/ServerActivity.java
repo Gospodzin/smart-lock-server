@@ -3,8 +3,12 @@ package com.stak.smartlockserver.view;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.stak.smartlockserver.R;
 import com.stak.smartlockserver.rest.ServerService;
@@ -22,16 +27,20 @@ import com.stak.smartlockserver.security.SecurityHelper;
 import com.stak.smartlockserver.security.model.Registration;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
 import static com.stak.smartlockserver.security.Constants.KEY_STORE_FILE;
 
 
-public class ServerActivity extends ActionBarActivity implements View.OnClickListener {
+public class ServerActivity extends ActionBarActivity {
 
     AlertDialog createUserDialog;
-    Button createUserButton;
     ListView usersList;
     ArrayAdapter<UserDTO> usersAdapter;
 
@@ -43,6 +52,14 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
     @Inject
     SecurityHelper securityHelper;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_server);
+
+        init();
+    }
+
     private void init() {
         SmartLockApp.inject(this);
 
@@ -52,11 +69,10 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
 
         createUserDialog = createDialog();
 
-        createUserButton = (Button) findViewById(R.id.addUserButton);
-        createUserButton.setOnClickListener(this);
-
         registerForContextMenu(usersList);
 
+        TextView ipTextView = (TextView) findViewById(R.id.ipTextView);
+        ipTextView.setText(getIp());
 
         initKeyStore();
         startService(new Intent(this, ServerService.class));
@@ -70,6 +86,28 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getIp() {
+        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+        int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+
+        // Convert little-endian to big-endianif needed
+        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+            ipAddress = Integer.reverseBytes(ipAddress);
+        }
+
+        byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
+
+        String ipAddressString;
+        try {
+            ipAddressString = InetAddress.getByAddress(ipByteArray).getHostAddress();
+        } catch (UnknownHostException ex) {
+            Log.e("WIFIIP", "Unable to get host address.");
+            ipAddressString = null;
+        }
+
+        return ipAddressString;
     }
 
     private AlertDialog createDialog() {
@@ -112,14 +150,6 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_server);
-
-        init();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_server, menu);
@@ -127,12 +157,21 @@ public class ServerActivity extends ActionBarActivity implements View.OnClickLis
     }
 
     @Override
-    public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.addUserButton:
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch(item.getItemId()) {
+            case R.id.action_refresh:
+                usersAdapter.clear();
+                for(UserDTO user : viewHelper.getUsersList())
+                    usersAdapter.add(user);
+                return true;
+
+            case R.id.action_new_user:
                 createUserDialog.show();
-                break;
+                return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
