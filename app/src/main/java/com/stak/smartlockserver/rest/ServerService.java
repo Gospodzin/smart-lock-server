@@ -4,7 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-import com.stak.smartlockserver.rest.di.DIFinder;
+import com.stak.smartlockserver.rest.di.*;
 
 import org.restlet.Component;
 import org.restlet.Context;
