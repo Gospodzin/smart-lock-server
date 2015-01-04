@@ -2,11 +2,10 @@ package com.stak.smartlockserver.rest;
 
 import android.util.Log;
 
-import com.stak.smartlockserver.LockManager;
+import com.stak.smartlockserver.lock.LockManager;
 import com.stak.smartlockserver.rest.dto.CommandDTO;
 import com.stak.smartlockserver.security.SecurityHelper;
 
-import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 

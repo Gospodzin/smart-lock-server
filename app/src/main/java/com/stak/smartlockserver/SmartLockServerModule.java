@@ -9,6 +9,7 @@ import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
+import com.stak.smartlockserver.lock.LockManager;
 import com.stak.smartlockserver.persistence.DBOpenHelper;
 import com.stak.smartlockserver.rest.RegistrationResource;
 import com.stak.smartlockserver.rest.SmartLockResource;
