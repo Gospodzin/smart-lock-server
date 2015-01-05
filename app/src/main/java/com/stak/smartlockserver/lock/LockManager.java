@@ -2,7 +2,9 @@ package com.stak.smartlockserver.lock;
 
 import android.util.Log;
 
-import com.stak.smartlockserver.lock.drivers.AudioEngineDriver;
+import com.stak.smartlockserver.lock.drivers.EngineDriver;
+
+import javax.inject.Inject;
 
 /**
  * Created by gospo on 29.12.14.
@@ -10,7 +12,9 @@ import com.stak.smartlockserver.lock.drivers.AudioEngineDriver;
 public class LockManager {
 
     public static final int TIME = 5000;
-    private AudioEngineDriver engineDriver = new AudioEngineDriver();
+
+    @Inject
+    EngineDriver engineDriver;
 
     public void open(){
         Log.i(getClass().toString(), "Opening lock...");

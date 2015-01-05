@@ -3,13 +3,13 @@ package com.stak.smartlockserver;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
-import com.stak.smartlockserver.lock.LockManager;
+import com.stak.smartlockserver.lock.drivers.AudioEngineDriver;
+import com.stak.smartlockserver.lock.drivers.EngineDriver;
 import com.stak.smartlockserver.persistence.DBOpenHelper;
 import com.stak.smartlockserver.rest.RegistrationResource;
 import com.stak.smartlockserver.rest.SmartLockResource;
@@ -54,7 +54,6 @@ public class SmartLockServerModule {
 
     @Provides @Singleton public Dao<Registration, String> provideRegistrationsDao(ConnectionSource connectionSource){
         try {
-            Log.i("da","ads");
             return DaoManager.createDao(connectionSource, Registration.class);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -69,8 +68,10 @@ public class SmartLockServerModule {
         }
     }
 
-    @Provides @Singleton public LockManager provideLockManager() {
-        return new LockManager();
+    // init driver
+    private EngineDriver engineDriver = new AudioEngineDriver();
+    @Provides @Singleton public EngineDriver provideEngineDriver() {
+        return engineDriver;
     }
 
     @Provides @Singleton public KeyStoreGenerator keyStoreGenerator() {return new KeyStoreGenerator();}

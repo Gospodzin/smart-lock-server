@@ -2,15 +2,8 @@ package com.stak.smartlockserver;
 
 import android.app.Application;
 
-import com.stak.smartlockserver.security.SecurityHelper;
-
-import org.restlet.engine.Engine;
-import org.restlet.ext.gson.GsonConverter;
-
 import java.util.Arrays;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.ObjectGraph;
 
@@ -18,9 +11,6 @@ import dagger.ObjectGraph;
  * Created by gospo on 29.12.14.
  */
 public class SmartLockApp extends Application {
-
-    @Inject
-    SecurityHelper securityHelper;
 
     private static ObjectGraph objectGraph;
 

@@ -1,4 +1,4 @@
-package com.stak.smartlockserver.lock.drivers;
+package com.stak.smartlockserver.lock.drivers.utils;
 
 /**
  * Created by gospo on 04.01.15.
