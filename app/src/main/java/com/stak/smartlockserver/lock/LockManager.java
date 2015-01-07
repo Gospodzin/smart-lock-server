@@ -11,7 +11,7 @@ import javax.inject.Inject;
  */
 public class LockManager {
 
-    public static final int TIME = 5000;
+    public static final int TIME = 1000;
 
     @Inject
     EngineDriver engineDriver;

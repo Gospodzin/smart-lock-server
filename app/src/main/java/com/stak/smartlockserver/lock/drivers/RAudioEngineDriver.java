@@ -13,6 +13,7 @@ import static com.stak.smartlockserver.lock.drivers.utils.ToneGenerator.SAMPLE_R
 
 /**
  * Created by gospo on 04.01.15.
+ * Driver for my messed up audio jack output ;[
  */
 public class RAudioEngineDriver implements EngineDriver {
 

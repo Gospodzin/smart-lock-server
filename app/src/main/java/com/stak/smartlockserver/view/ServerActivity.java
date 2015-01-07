@@ -3,11 +3,8 @@ package com.stak.smartlockserver.view;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -21,17 +18,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.stak.smartlockserver.R;
-import com.stak.smartlockserver.rest.ServerService;
 import com.stak.smartlockserver.SmartLockApp;
+import com.stak.smartlockserver.rest.ServerService;
 import com.stak.smartlockserver.security.SecurityHelper;
 import com.stak.smartlockserver.security.model.Registration;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 import javax.inject.Inject;
 
@@ -88,25 +84,29 @@ public class ServerActivity extends ActionBarActivity {
         }
     }
 
-    private String getIp() {
-        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-        int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
-
-        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN))
-            ipAddress = Integer.reverseBytes(ipAddress);
-
-        byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
-
-        String ipAddressString;
+    public String getIp() {
         try {
-            ipAddressString = InetAddress.getByAddress(ipByteArray).getHostAddress();
-        } catch (UnknownHostException ex) {
-            Log.e("WIFIIP", "Unable to get host address.");
-            ipAddressString = null;
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+                    .hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                if (intf.getName().contains("wlan")) {
+                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+                            .hasMoreElements();) {
+                        InetAddress inetAddress = enumIpAddr.nextElement();
+                        if (!inetAddress.isLoopbackAddress()
+                                && (inetAddress.getAddress().length == 4)) {
+                            Log.d("WIFIIP", inetAddress.getHostAddress());
+                            return inetAddress.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+                Log.e("WIFIIP", e.toString());
         }
-
-        return ipAddressString;
+        return null;
     }
+
 
     private AlertDialog createDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
